@@ -32,7 +32,7 @@ func main() {
 
 	cli := etcd.GrpcClient(tlsConfig, endPoints)
 
-	if etcd.ClusterStatus(*cli) {
+	if etcd.ClusterStatus(cli) {
 		fmt.Println("ok")
 	} else {
 		fmt.Println("ko")
