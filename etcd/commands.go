@@ -19,6 +19,7 @@ func ClusterStatus(cli *clientv3.Client) bool {
 			if err != nil {
 				log.Fatalln(err)
 			}
+			fmt.Println(resp)
 			fmt.Println(resp.RaftAppliedIndex)
 			fmt.Println(resp.RaftIndex)
 			fmt.Println(resp.RaftTerm)
