@@ -1,3 +1,4 @@
-*.pem
-*.cer
+.pem
+.cer
+.csr
 cluster.conf
