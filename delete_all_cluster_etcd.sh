@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #remove old run
-for etcd_id in  `docker ps -a |grep etcd|awk '{print $1}'`
+for etcd_id in  etcd1 etcd2 etcd3
 do
     docker rm -f ${etcd_id}
 done
