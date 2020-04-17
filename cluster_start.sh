@@ -53,5 +53,5 @@ export CLUSTER=${NAME_1}=https://${HOST_1}:2380,${NAME_2}=https://${HOST_2}:2380
 #spawn the servers
 for H in 1 2 3
 do
-    ./start_node.sh ${NAME[${H}]} &
+    ./node_start.sh ${NAME[${H}]} &
 done
