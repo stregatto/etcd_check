@@ -110,7 +110,7 @@ func GrpcClient(tlsCfg SecureCfg, endPoints []string) *clientv3.Client {
 	var cfgs = clientv3.Config{
 		Endpoints:            endPoints,
 		AutoSyncInterval:     0,
-		DialTimeout:          0,
+		DialTimeout:          1000000,
 		DialKeepAliveTime:    0,
 		DialKeepAliveTimeout: 0,
 		MaxCallSendMsgSize:   0,

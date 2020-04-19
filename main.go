@@ -20,23 +20,23 @@ func main() {
 	cacert := flag.String("cacert", "etcd_tls/ca.pem", "Certification authority file")
 	cert := flag.String("cert", "etcd_tls/server.pem", "Server or Client certificate file")
 	key := flag.String("key", "etcd_tls/server-key.pem", "Server or Client certificate key file")
-	endPoints := strings.Split(*flag.String("endpoints", "etcd1:2379", "Comma separated list of ETCD endpoints without protocol"), ",")
+	endPoints := flag.String("endpoints", "etcd1:2379", "Comma separated list of ETCD endpoints without protocol")
 	// protocol := flag.String("proto", "https://", "Add transport protocol for http connection")
 	flag.Parse()
-
 	tlsConfig := etcd.SecureCfg{
 		Cert:   *cert,
 		Key:    *key,
 		CaCert: *cacert,
 	}
 
-	cli := etcd.GrpcClient(tlsConfig, endPoints)
+	cli := etcd.GrpcClient(tlsConfig, strings.Split(*endPoints, ","))
 
-	if etcd.ClusterStatus(cli) {
-		fmt.Println("ok")
-	} else {
-		fmt.Println("ko")
-	}
+	// I can retrive some data
+	fmt.Println(etcd.GetRaftIndexPerMembers(cli))
+
+	fmt.Println(etcd.GetEndPointsFromInitiatedClient(cli))
+
+	fmt.Println(etcd.GetClusterEndpoints(cli))
 
 	//var eh epHealth
 	//if err != nil {
