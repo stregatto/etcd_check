@@ -13,7 +13,8 @@ import (
 func command(cli *clientv3.Client, cmd string) <-chan commandResChan {
 	var wg sync.WaitGroup
 	// channel still not ok
-	hch := make(chan commandResChan, len(cli.Endpoints()))
+	// hch := make(chan commandResChan, len(cli.Endpoints()))
+	hch := make(chan commandResChan)
 	for _, ep := range cli.Endpoints() {
 		wg.Add(1)
 		go func(cli *clientv3.Client, ep string) {
@@ -24,8 +25,10 @@ func command(cli *clientv3.Client, cmd string) <-chan commandResChan {
 			hch <- crc
 		}(cli, ep)
 	}
-	wg.Wait()
-	close(hch)
+	go func() {
+		wg.Wait()
+		close(hch)
+	}()
 	return hch
 }
 
