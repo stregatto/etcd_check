@@ -7,13 +7,12 @@ import (
 	"go.etcd.io/etcd/clientv3"
 	"log"
 	"sync"
+	"time"
 )
 
 //command provides the interface to query all cluster member sending to it the command you need
 func command(cli *clientv3.Client, cmd string) <-chan commandResChan {
 	var wg sync.WaitGroup
-	// channel still not ok
-	// hch := make(chan commandResChan, len(cli.Endpoints()))
 	hch := make(chan commandResChan)
 	for _, ep := range cli.Endpoints() {
 		wg.Add(1)
@@ -35,9 +34,11 @@ func command(cli *clientv3.Client, cmd string) <-chan commandResChan {
 // callCommand execute the command cmd against one ETCD endpoint,
 // it returns the interface{} containing the result of the command returned by clientv3
 func callCommand(cli *clientv3.Client, cmd, ep string) interface{} {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
 	switch cmd {
 	case "clusterStatus":
-		var resp, err = cli.Status(context.Background(), ep)
+		var resp, err = cli.Status(ctx, ep)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -46,7 +47,7 @@ func callCommand(cli *clientv3.Client, cmd, ep string) interface{} {
 		var resp = cli.Endpoints()
 		return resp
 	case "memberList":
-		var resp, err = cli.MemberList(context.Background())
+		var resp, err = cli.MemberList(ctx)
 		if err != nil {
 			log.Fatal(err)
 		}
