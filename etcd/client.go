@@ -69,7 +69,7 @@ func HttpClient(transport *http.Transport, endPoints string) {
 	}
 	// get "/foo" key's value
 	log.Print("Getting '/foo' key value")
-	//resp, err = kapi.Get(context.Background(), "/foo", nil)
+	//resp, Err = kapi.Get(context.Background(), "/foo", nil)
 	resp, err = kapi.Get(context.Background(), "/foo", nil)
 	if err != nil {
 		log.Fatal(err)

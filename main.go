@@ -31,11 +31,9 @@ func main() {
 
 	cli := etcd.GrpcClient(tlsConfig, strings.Split(*endPoints, ","))
 
-	// I can retrive some data
+	// I can retrieve some data
 	fmt.Println(etcd.GetRaftIndexPerMembers(cli))
-
 	fmt.Println(etcd.GetEndPointsFromInitiatedClient(cli))
-
 	fmt.Println(etcd.GetClusterEndpoints(cli))
 
 	//var eh epHealth

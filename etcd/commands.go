@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"go.etcd.io/etcd/clientv3"
-	"log"
 	"sync"
 	"time"
 )
@@ -19,7 +18,7 @@ func command(cli *clientv3.Client, cmd string) <-chan commandResChan {
 		go func(cli *clientv3.Client, ep string) {
 			var crc commandResChan
 			defer wg.Done()
-			crc.res = callCommand(cli, cmd, ep)
+			crc.res, crc.err = callCommand(cli, cmd, ep)
 			crc.server = ep
 			hch <- crc
 		}(cli, ep)
@@ -33,38 +32,46 @@ func command(cli *clientv3.Client, cmd string) <-chan commandResChan {
 
 // callCommand execute the command cmd against one ETCD endpoint,
 // it returns the interface{} containing the result of the command returned by clientv3
-func callCommand(cli *clientv3.Client, cmd, ep string) interface{} {
+func callCommand(cli *clientv3.Client, cmd, ep string) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	switch cmd {
 	case "clusterStatus":
-		var resp, err = cli.Status(ctx, ep)
-		if err != nil {
-			log.Fatal(err)
-		}
-		return resp
+		var res, err = cli.Status(ctx, ep)
+		return res, err
 	case "endpoints":
-		var resp = cli.Endpoints()
-		return resp
+		var res = cli.Endpoints()
+		return res, nil
 	case "memberList":
-		var resp, err = cli.MemberList(ctx)
-		if err != nil {
-			log.Fatal(err)
-		}
-		return resp
+		var res, err = cli.MemberList(ctx)
+		return res, err
 	}
-	return fmt.Errorf("missing Command")
+	return nil, fmt.Errorf("missing Command")
 }
 
-//GetRaftIndexPerMembers returns a list of raftIndexPerMember
-func GetRaftIndexPerMembers(cli *clientv3.Client) []raftIndexPerMember {
+//TODO
+//fix the error I'm passing you...
+
+//GetRaftIndexPerMembers returns a list of RaftIndexPerMember
+func GetRaftIndexPerMembers(cli *clientv3.Client) []RaftIndexPerMember {
 	ch := command(cli, "clusterStatus")
-	raftx := make([]raftIndexPerMember, len(ch))
+	raftx := make([]RaftIndexPerMember, len(ch))
 	for v := range ch {
-		raftx = append(raftx, raftIndexPerMember{
-			v.server,
-			v.res.(*clientv3.StatusResponse).Header.MemberId,
-			v.res.(*clientv3.StatusResponse).RaftIndex,
+		raftx = append(raftx, RaftIndexPerMember{
+			Server: v.server,
+			MemberId: func() uint64 {
+				if v.err == nil {
+					return v.res.(*clientv3.StatusResponse).Header.MemberId
+				}
+				return uint64(0)
+			}(),
+			RaftIndex: func() uint64 {
+				if v.err == nil {
+					return v.res.(*clientv3.StatusResponse).RaftIndex
+				}
+				return uint64(0)
+			}(),
+			Err: v.err,
 		})
 
 	}
@@ -72,26 +79,32 @@ func GetRaftIndexPerMembers(cli *clientv3.Client) []raftIndexPerMember {
 }
 
 //TODO
-//fix the strunct that retrives the ep from the resault... no idea
+//fix the struct that retries the Ep from the result... no idea
 
 //GetEndPointsFromInitiatedClient returns list of endpoints form the client you instantiated.
-func GetEndPointsFromInitiatedClient(cli *clientv3.Client) []clientEndpoints {
+func GetEndPointsFromInitiatedClient(cli *clientv3.Client) []ClientEndpoints {
 	ch := command(cli, "endpoints")
-	epx := make([]clientEndpoints, len(ch))
+	epx := make([]ClientEndpoints, len(ch))
 	for v := range ch {
-		epx = append(epx, clientEndpoints{
+		epx = append(epx, ClientEndpoints{
 			v.server,
-			v.res.([]string)})
+			v.res.([]string),
+			v.err,
+		})
 	}
 	return epx
 }
 
 //GetClusterEndpoints returns the list of endpoint configured in the cluster you are querying.
-func GetClusterEndpoints(cli *clientv3.Client) []clusterEndpoints {
+func GetClusterEndpoints(cli *clientv3.Client) []ClusterEndpoints {
 	ch := command(cli, "memberList")
-	epx := make([]clusterEndpoints, len(ch))
+	epx := make([]ClusterEndpoints, len(ch))
 	for v := range ch {
-		epx = append(epx, clusterEndpoints{v.server, v.res.(*clientv3.MemberListResponse).Members})
+		epx = append(epx, ClusterEndpoints{
+			v.server,
+			v.res.(*clientv3.MemberListResponse).Members,
+			v.err,
+		})
 	}
 	return epx
 }

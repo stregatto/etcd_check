@@ -7,20 +7,24 @@ import (
 type commandResChan struct {
 	server string
 	res    interface{}
+	err    error
 }
 
-type clusterEndpoints struct {
-	server string
-	ep     []*etcdserverpb.Member
+type ClusterEndpoints struct {
+	Server string
+	Ep     []*etcdserverpb.Member
+	Err    error
 }
 
-type clientEndpoints struct {
-	server string
-	ep     []string
+type ClientEndpoints struct {
+	Server string
+	Ep     []string
+	Err    error
 }
 
-type raftIndexPerMember struct {
-	server    string
-	memberId  uint64
-	raftIndex uint64
+type RaftIndexPerMember struct {
+	Server    string
+	MemberId  uint64
+	RaftIndex uint64
+	Err       error
 }
