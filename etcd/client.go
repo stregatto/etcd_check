@@ -1,4 +1,4 @@
-// Package etcd contains utils to access ETCD apis both v2 and v3.
+// Package etcd contains core to access ETCD apis both v2 and v3.
 // APIs v2 are not used but it was a good exercise
 package etcd
 
@@ -35,13 +35,13 @@ func Transport(ca string, clientCertificate string, clientCertificateKey string)
 		log.Fatal(err)
 	}
 
-	var transport = &http.Transport{
+	var t = &http.Transport{
 		TLSClientConfig: &tls.Config{
 			RootCAs:      caCertPool,
 			Certificates: []tls.Certificate{cert},
 		},
 	}
-	return transport
+	return t
 }
 
 // Client instantiate a new etcd client, do nothing for now.
