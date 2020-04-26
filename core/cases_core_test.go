@@ -212,4 +212,52 @@ var testsCasesRaftIndexPerMember = []struct {
 			}, // etcd3 and etcd5 are failing
 		},
 	},
+	{
+		raftDrift: 1, // Test for 1 drift, unknown members are failing
+		irpm: []etcd.RaftIndexPerMember{
+			{
+				"etcd1",
+				111,
+				10,
+				nil,
+			},
+			{
+				"etcd2",
+				222,
+				11,
+				nil,
+			},
+			{
+				"etcd3",
+				222,
+				11,
+				nil,
+			},
+			{
+				"etcd4",
+				222,
+				12,
+				nil,
+			},
+			{
+				"etcd5",
+				222,
+				12,
+				nil,
+			},
+		},
+		expected: struct {
+			status     bool
+			raftValues []raftValue
+		}{
+			status: false, // is expected a false statement, drift is not ok
+			raftValues: []raftValue{
+				{10, "etcd1"},
+				{11, "etcd2"},
+				{11, "etcd3"},
+				{12, "etcd4"},
+				{12, "etcd5"},
+			}, // in a way or in another all members are failing, I cannot say which.
+		},
+	},
 }

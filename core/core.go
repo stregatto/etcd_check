@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"sort"
 )
 
 // Members check, verifies if some member is not available
@@ -29,31 +30,32 @@ func MembresHealthiness(raftIdxPerMember []etcd.RaftIndexPerMember, maxFailingMe
 // TODO: fix the function accordingly to tests
 func RaftCoherence(raftIdxPerMember []etcd.RaftIndexPerMember, maxRaftDrift int) (bool, []raftValue) {
 	status := true
-	var raftStatus []raftValue
-	var currentRaftIndex uint64
-	for i := 0; i > len(raftIdxPerMember)-1; i++ {
-		if raftIdxPerMember[i].RaftIndex > raftIdxPerMember[i+1].RaftIndex {
-			currentRaftIndex = raftIdxPerMember[i].RaftIndex
-		} else {
-			currentRaftIndex = raftIdxPerMember[i+1].RaftIndex
+	sort.Slice(raftIdxPerMember, func(i, j int) bool {
+		if raftIdxPerMember[i].RaftIndex < raftIdxPerMember[j].RaftIndex {
+			return true
 		}
-		delta := float64(currentRaftIndex - raftIdxPerMember[i].RaftIndex)
-		if math.Abs(delta) > float64(maxRaftDrift) {
-			if delta > 0 {
-				raftStatus = append(raftStatus, raftValue{
-					value:  currentRaftIndex,
-					member: raftIdxPerMember[i].Server,
-				})
-			} else {
-				raftStatus = append(raftStatus, raftValue{
-					value:  raftIdxPerMember[i+1].RaftIndex,
-					member: raftIdxPerMember[i+1].Server,
-				})
-			}
-			status = false
+		if raftIdxPerMember[i].RaftIndex > raftIdxPerMember[j].RaftIndex {
+			return false
 		}
+		return raftIdxPerMember[i].RaftIndex < raftIdxPerMember[j].RaftIndex
+	})
+
+	if math.Abs(float64(raftIdxPerMember[0].RaftIndex-raftIdxPerMember[len(raftIdxPerMember)-1].RaftIndex)) > float64(maxRaftDrift) {
+		status = false
 	}
-	return status, raftStatus
+
+	//TODO: now I've the map of frequencies, I need to retrive the members are failing accordingly to raft drift or return all members
+	var f = map[uint64][]string{
+		raftIdxPerMember[0].RaftIndex: {},
+	}
+	for _, v := range raftIdxPerMember {
+		f[v.RaftIndex] = append(f[v.RaftIndex], v.Server)
+	}
+
+	return status, []raftValue{
+		{10,
+			"etcd1"},
+	}
 }
 
 // GetFile returns a file content in []byte format form a given path, useless.
