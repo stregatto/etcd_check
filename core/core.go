@@ -26,7 +26,7 @@ func MembresHealthiness(raftIdxPerMember []etcd.RaftIndexPerMember, maxFailingMe
 }
 
 // RaftCoherence check if the raft index for every member is in the maxRaftDrift value.
-// TODO add a test for this function, it's too important, must be tested
+// TODO: fix the function accordingly to tests
 func RaftCoherence(raftIdxPerMember []etcd.RaftIndexPerMember, maxRaftDrift int) (bool, []raftValue) {
 	status := true
 	var raftStatus []raftValue

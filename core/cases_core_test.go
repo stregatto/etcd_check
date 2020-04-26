@@ -3,11 +3,11 @@ package core
 import "github.com/stregatto/etcd_check/etcd"
 
 type expected struct {
-	status  bool
-	members []string
+	status     bool
+	raftValues []raftValue
 }
 
-var testCasesRaftIndexPerMember = []struct {
+var testsCasesRaftIndexPerMember = []struct {
 	raftDrift int
 	irpm      []etcd.RaftIndexPerMember
 	expected  expected
@@ -16,60 +16,60 @@ var testCasesRaftIndexPerMember = []struct {
 		raftDrift: 0, // Test for 0 drift
 		irpm: []etcd.RaftIndexPerMember{
 			{
-				Server:    "etcd1",
-				MemberId:  111,
-				RaftIndex: 10,
-				Err:       nil,
+				"etcd1",
+				111,
+				10,
+				nil,
 			},
 			{
-				Server:    "etcd2",
-				MemberId:  222,
-				RaftIndex: 10,
-				Err:       nil,
+				"etcd2",
+				222,
+				10,
+				nil,
 			},
 			{
-				Server:    "etcd3",
-				MemberId:  222,
-				RaftIndex: 10,
-				Err:       nil,
+				"etcd3",
+				222,
+				10,
+				nil,
 			},
 		},
 		expected: struct {
-			status  bool
-			members []string
+			status     bool
+			raftValues []raftValue
 		}{
-			status:  true,       // is expected a true statement, drift is ok
-			members: []string{}, // no failing members returned
+			status:     true,          // is expected a true statement, drift is ok
+			raftValues: []raftValue{}, // no failing members returned
 		},
 	},
 	{
 		raftDrift: 1, // Test for 1 drift ok
 		irpm: []etcd.RaftIndexPerMember{
 			{
-				Server:    "etcd1",
-				MemberId:  111,
-				RaftIndex: 10,
-				Err:       nil,
+				"etcd1",
+				111,
+				10,
+				nil,
 			},
 			{
-				Server:    "etcd2",
-				MemberId:  222,
-				RaftIndex: 11,
-				Err:       nil,
+				"etcd2",
+				222,
+				11,
+				nil,
 			},
 			{
-				Server:    "etcd3",
-				MemberId:  222,
-				RaftIndex: 10,
-				Err:       nil,
+				"etcd3",
+				222,
+				10,
+				nil,
 			},
 		},
 		expected: struct {
-			status  bool
-			members []string
+			status     bool
+			raftValues []raftValue
 		}{
-			status:  true,       // is expected a true statement, drift is ok
-			members: []string{}, // no failing members returned
+			status:     true,          // is expected a true statement, drift is ok
+			raftValues: []raftValue{}, // no failing members returned
 		},
 	},
 	{
@@ -95,113 +95,121 @@ var testCasesRaftIndexPerMember = []struct {
 			},
 		},
 		expected: struct {
-			status  bool
-			members []string
+			status     bool
+			raftValues []raftValue
 		}{
-			status:  false,             // is expected a false statement, drift is not ok
-			members: []string{"etcd2"}, // etcd2 member is failing
+			status: false, // is expected a false statement, drift is not ok
+			raftValues: []raftValue{
+				{12, "etcd2"},
+			}, // etcd2 member is failing
 		},
 	},
 	{
 		raftDrift: 1, // Test for 1 drift, one node is failing, is before the other.
 		irpm: []etcd.RaftIndexPerMember{
 			{
-				Server:    "etcd1",
-				MemberId:  111,
-				RaftIndex: 10,
-				Err:       nil,
+				"etcd1",
+				111,
+				10,
+				nil,
 			},
 			{
-				Server:    "etcd2",
-				MemberId:  222,
-				RaftIndex: 12,
-				Err:       nil,
+				"etcd2",
+				222,
+				12,
+				nil,
 			},
 			{
-				Server:    "etcd3",
-				MemberId:  222,
-				RaftIndex: 12,
-				Err:       nil,
+				"etcd3",
+				222,
+				12,
+				nil,
 			},
 		},
 		expected: struct {
-			status  bool
-			members []string
+			status     bool
+			raftValues []raftValue
 		}{
-			status:  false,             // is expected a false statement, drift is not ok
-			members: []string{"etcd1"}, // etcd2 member is failing
+			status: false, // is expected a false statement, drift is not ok
+			raftValues: []raftValue{
+				{2, "etcd2"},
+			}, // etcd2 member is failing
 		},
 	},
 	{
 		raftDrift: 1, // Test for 1 drift, all members are failing
 		irpm: []etcd.RaftIndexPerMember{
 			{
-				Server:    "etcd1",
-				MemberId:  111,
-				RaftIndex: 10,
-				Err:       nil,
+				"etcd1",
+				111,
+				10,
+				nil,
 			},
 			{
-				Server:    "etcd2",
-				MemberId:  222,
-				RaftIndex: 12,
-				Err:       nil,
+				"etcd2",
+				222,
+				12,
+				nil,
 			},
 			{
-				Server:    "etcd3",
-				MemberId:  222,
-				RaftIndex: 14,
-				Err:       nil,
+				"etcd3",
+				222,
+				14,
+				nil,
 			},
 		},
 		expected: struct {
-			status  bool
-			members []string
+			status     bool
+			raftValues []raftValue
 		}{
-			status:  false,                               // is expected a false statement, drift is not ok
-			members: []string{"etcd1", "etcd2", "etcd3"}, //  all member are failing
+			status: false, // is expected a false statement, drift is not ok
+			raftValues: []raftValue{
+				{10, "etcd1"}, {12, "etcd2"}, {14, "etcd3"},
+			}, //  all member are failing
 		},
 	},
 	{
 		raftDrift: 1, // Test for 1 drift, 2 members are failing
 		irpm: []etcd.RaftIndexPerMember{
 			{
-				Server:    "etcd1",
-				MemberId:  111,
-				RaftIndex: 10,
-				Err:       nil,
+				"etcd1",
+				111,
+				10,
+				nil,
 			},
 			{
-				Server:    "etcd2",
-				MemberId:  222,
-				RaftIndex: 11,
-				Err:       nil,
+				"etcd2",
+				222,
+				11,
+				nil,
 			},
 			{
-				Server:    "etcd3",
-				MemberId:  222,
-				RaftIndex: 13,
-				Err:       nil,
+				"etcd3",
+				222,
+				13,
+				nil,
 			},
 			{
-				Server:    "etcd4",
-				MemberId:  222,
-				RaftIndex: 10,
-				Err:       nil,
+				"etcd4",
+				222,
+				10,
+				nil,
 			},
 			{
-				Server:    "etcd5",
-				MemberId:  222,
-				RaftIndex: 9,
-				Err:       nil,
+				"etcd5",
+				222,
+				9,
+				nil,
 			},
 		},
 		expected: struct {
-			status  bool
-			members []string
+			status     bool
+			raftValues []raftValue
 		}{
-			status:  false,                      // is expected a false statement, drift is not ok
-			members: []string{"etcd3", "etcd5"}, //  are failing
+			status: false, // is expected a false statement, drift is not ok
+			raftValues: []raftValue{
+				{13, "etcd3"}, {9, "etcd5"},
+			}, // etcd3 and etcd5 are failing
 		},
 	},
 }
