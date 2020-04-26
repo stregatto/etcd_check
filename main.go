@@ -38,7 +38,7 @@ func main() {
 	fmt.Println(etcd.GetRaftIndexPerMembers(cli))
 	fmt.Println(etcd.GetEndPointsFromInitiatedClient(cli))
 	fmt.Println(etcd.GetClusterEndpoints(cli))
-	fmt.Println(core.MembresLivenes(etcd.GetRaftIndexPerMembers(cli), *maxFailedMembers))
+	fmt.Println(core.MembresHealthiness(etcd.GetRaftIndexPerMembers(cli), *maxFailedMembers))
 	fmt.Println(core.RaftCoherence(etcd.GetRaftIndexPerMembers(cli), *maxRaftDrift))
 
 	//Not used: is an example for v2 API

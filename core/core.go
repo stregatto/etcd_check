@@ -9,7 +9,7 @@ import (
 )
 
 // Members check, verifies if some member is not available
-func MembresLivenes(raftIdxPerMember []etcd.RaftIndexPerMember, maxFailingMembers int) (bool, []string) {
+func MembresHealthiness(raftIdxPerMember []etcd.RaftIndexPerMember, maxFailingMembers int) (bool, []string) {
 	status := true
 	var failedMembersList []string
 	failedMembers := 0
