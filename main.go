@@ -16,8 +16,6 @@ type epHealth struct {
 }
 
 func main() {
-	// TODO:cert
-	// change names accordingly to etcd library
 	cacert := flag.String("cacert", "etcd_tls/ca.pem", "Certification authority file")
 	cert := flag.String("cert", "etcd_tls/server.pem", "Server or Client certificate file")
 	key := flag.String("key", "etcd_tls/server-key.pem", "Server or Client certificate key file")
