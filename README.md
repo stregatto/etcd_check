@@ -1,6 +1,16 @@
 # etcd_check
 This is a simple _ETCD_ check, it's intended to verify if all endpoints are ok, and it's useful to better understand ETCD api :)
 
+## run
+
+To run this software you have to enumerate all endpoints and the certificate it will use to access them
+`go run ./main.go -endpoints etcd1:2379,etcd2:2381,etcd3:2383 -cert ./etcd_tls/etcd1.pem -key ./etcd_tls/etcd1-key.pem`
+
+## returns
+
+It returns something, it still depends on my experiments :D.
+Now it returns the outputs of some function and `true` or `false` if the raftindex of queried cluster members is in the drift or not.
+
 # ETCD server setup
 
 It's useful to have an _ETCD_ cluster to test the software. In this repo you'll find some useful (and very "stupid") scripts to run a dummy _ETCD_ cluster with _TLS_ on docker.
