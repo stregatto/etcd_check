@@ -4,6 +4,7 @@ This is a simple _ETCD_ check, it's intended to verify if all endpoints are ok, 
 ## run
 
 To run this software you have to enumerate all endpoints and the certificate it will use to access them
+
 `go run ./main.go -endpoints etcd1:2379,etcd2:2381,etcd3:2383 -cert ./etcd_tls/etcd1.pem -key ./etcd_tls/etcd1-key.pem`
 
 ## returns
