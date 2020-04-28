@@ -49,9 +49,6 @@ func callCommand(cli *clientv3.Client, cmd, ep string) (interface{}, error) {
 	return nil, fmt.Errorf("missing Command")
 }
 
-//TODO
-//fix the error I'm passing you...
-
 //GetRaftIndexPerMembers returns a list of RaftIndexPerMember
 func GetRaftIndexPerMembers(cli *clientv3.Client) RaftIndexPerMember {
 	ch := command(cli, "clusterStatus")
@@ -76,9 +73,6 @@ func GetRaftIndexPerMembers(cli *clientv3.Client) RaftIndexPerMember {
 	}
 	return raftx
 }
-
-//TODO
-//fix the struct that retries the Ep from the result... no idea
 
 //GetEndPointsFromInitiatedClient returns list of endpoints form the client you instantiated.
 func GetEndPointsFromInitiatedClient(cli *clientv3.Client) []ClientEndpoints {

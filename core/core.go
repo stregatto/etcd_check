@@ -28,10 +28,9 @@ func MembresHealthiness(raftIdxPerMember etcd.RaftIndexPerMember, maxFailingMemb
 }
 
 // RaftCoherence check if the raft index for every member is in the maxRaftDrift value.
-// TODO: fix the function accordingly to tests
 func RaftCoherence(raftIndexPerMember etcd.RaftIndexPerMember, maxRaftDrift int) (bool, raftValue) {
 
-	//TODO: now I've the map of frequencies, I need to retrive the members are failing accordingly to raft drift or return all members
+	//TODO: now I've the map of frequencies, I need to retrieve the members are failing accordingly to raft drift or return all members
 	var f = map[uint64][]string{}
 	for k, v := range raftIndexPerMember {
 		f[v.RaftIndex] = append(f[v.RaftIndex], k)
@@ -50,6 +49,7 @@ func RaftCoherence(raftIndexPerMember etcd.RaftIndexPerMember, maxRaftDrift int)
 	for k := range f {
 		collectedRafts = append(collectedRafts, k)
 	}
+
 	sort.Slice(collectedRafts, func(i, j int) bool {
 		return collectedRafts[i] < collectedRafts[j]
 	})
