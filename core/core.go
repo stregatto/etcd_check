@@ -2,6 +2,7 @@
 package core
 
 import (
+	"fmt"
 	"github.com/stregatto/etcd_check/etcd"
 	"io/ioutil"
 	"log"
@@ -10,14 +11,14 @@ import (
 )
 
 // Members check, verifies if some member is not available
-func MembresHealthiness(raftIdxPerMember []etcd.RaftIndexPerMember, maxFailingMembers int) (bool, []string) {
+func MembresHealthiness(raftIdxPerMember etcd.RaftIndexPerMember, maxFailingMembers int) (bool, []string) {
 	status := true
 	var failedMembersList []string
 	failedMembers := 0
-	for _, rip := range raftIdxPerMember {
-		if rip.Err != nil {
+	for v := range raftIdxPerMember {
+		if raftIdxPerMember[v].Err != nil {
 			failedMembers++
-			failedMembersList = append(failedMembersList, rip.Server)
+			failedMembersList = append(failedMembersList, v)
 			if failedMembers >= maxFailingMembers {
 				status = false
 			}
@@ -28,34 +29,37 @@ func MembresHealthiness(raftIdxPerMember []etcd.RaftIndexPerMember, maxFailingMe
 
 // RaftCoherence check if the raft index for every member is in the maxRaftDrift value.
 // TODO: fix the function accordingly to tests
-func RaftCoherence(raftIdxPerMember []etcd.RaftIndexPerMember, maxRaftDrift int) (bool, []raftValue) {
-	status := true
-	sort.Slice(raftIdxPerMember, func(i, j int) bool {
-		if raftIdxPerMember[i].RaftIndex < raftIdxPerMember[j].RaftIndex {
-			return true
-		}
-		if raftIdxPerMember[i].RaftIndex > raftIdxPerMember[j].RaftIndex {
-			return false
-		}
-		return raftIdxPerMember[i].RaftIndex < raftIdxPerMember[j].RaftIndex
-	})
-
-	if math.Abs(float64(raftIdxPerMember[0].RaftIndex-raftIdxPerMember[len(raftIdxPerMember)-1].RaftIndex)) > float64(maxRaftDrift) {
-		status = false
-	}
+func RaftCoherence(raftIndexPerMember etcd.RaftIndexPerMember, maxRaftDrift int) (bool, raftValue) {
 
 	//TODO: now I've the map of frequencies, I need to retrive the members are failing accordingly to raft drift or return all members
-	var f = map[uint64][]string{
-		raftIdxPerMember[0].RaftIndex: {},
-	}
-	for _, v := range raftIdxPerMember {
-		f[v.RaftIndex] = append(f[v.RaftIndex], v.Server)
+	var f = map[uint64][]string{}
+	for k, v := range raftIndexPerMember {
+		f[v.RaftIndex] = append(f[v.RaftIndex], k)
 	}
 
-	return status, []raftValue{
-		{10,
-			"etcd1"},
+	// everything is ok, I can exit right now.
+	if len(f) <= 1 {
+		fmt.Println("fast exit!")
+		return true, raftValue{}
 	}
+
+	//quorum := len(raftIndexPerMember)/2 + 1
+	var failedMembers = raftValue{}
+	collectedRafts := []uint64{}
+
+	for k := range f {
+		collectedRafts = append(collectedRafts, k)
+	}
+	sort.Slice(collectedRafts, func(i, j int) bool {
+		return collectedRafts[i] < collectedRafts[j]
+	})
+
+	if math.Abs(float64(int64(collectedRafts[0]-collectedRafts[len(collectedRafts)-1]))) > float64(maxRaftDrift) {
+		return false, failedMembers
+	}
+
+	return true, failedMembers
+
 }
 
 // GetFile returns a file content in []byte format form a given path, useless.

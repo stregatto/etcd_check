@@ -53,12 +53,11 @@ func callCommand(cli *clientv3.Client, cmd, ep string) (interface{}, error) {
 //fix the error I'm passing you...
 
 //GetRaftIndexPerMembers returns a list of RaftIndexPerMember
-func GetRaftIndexPerMembers(cli *clientv3.Client) []RaftIndexPerMember {
+func GetRaftIndexPerMembers(cli *clientv3.Client) RaftIndexPerMember {
 	ch := command(cli, "clusterStatus")
-	raftx := make([]RaftIndexPerMember, len(ch))
+	raftx := make(RaftIndexPerMember, len(ch))
 	for v := range ch {
-		raftx = append(raftx, RaftIndexPerMember{
-			Server: v.server,
+		raftx[v.server] = RaftData{
 			MemberId: func() uint64 {
 				if v.err == nil {
 					return v.res.(*clientv3.StatusResponse).Header.MemberId
@@ -72,7 +71,7 @@ func GetRaftIndexPerMembers(cli *clientv3.Client) []RaftIndexPerMember {
 				return uint64(0)
 			}(),
 			Err: v.err,
-		})
+		}
 
 	}
 	return raftx

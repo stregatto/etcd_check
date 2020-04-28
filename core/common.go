@@ -1,6 +1,3 @@
 package core
 
-type raftValue struct {
-	value  uint64
-	member string
-}
+type raftValue map[uint64][]string

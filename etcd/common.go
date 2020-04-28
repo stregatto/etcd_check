@@ -22,8 +22,9 @@ type ClientEndpoints struct {
 	Err    error
 }
 
-type RaftIndexPerMember struct {
-	Server    string
+type RaftIndexPerMember map[string]RaftData
+
+type RaftData struct {
 	MemberId  uint64
 	RaftIndex uint64
 	Err       error
