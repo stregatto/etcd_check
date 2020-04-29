@@ -7,6 +7,36 @@ type expected struct {
 	failedMembers raftValue
 }
 
+var testIsBetween = []struct {
+	value    uint64
+	min      uint64
+	max      uint64
+	expected bool
+}{
+	{
+		10,
+		10,
+		10,
+		true,
+	}, {
+		10,
+		9,
+		11,
+		true,
+	}, {
+		11,
+		8,
+		10,
+		false,
+	},
+	{
+		11,
+		12,
+		13,
+		false,
+	},
+}
+
 var testsCasesRaftIndexPerMember = []struct {
 	raftDrift int
 	irpm      etcd.RaftIndexPerMember
@@ -188,7 +218,7 @@ var testsCasesRaftIndexPerMember = []struct {
 		}{
 			status: false, // is expected a false statement, drift is not ok
 			failedMembers: raftValue{
-				13: {"etcd3"}, 9: {"etcd5"},
+				13: {"etcd3"},
 			}, // etcd3 and etcd5 are failing
 		},
 	},
@@ -217,7 +247,7 @@ var testsCasesRaftIndexPerMember = []struct {
 			},
 			"etcd5": {
 				555,
-				12,
+				15,
 				nil,
 			},
 		},
@@ -227,9 +257,7 @@ var testsCasesRaftIndexPerMember = []struct {
 		}{
 			status: false, // is expected a false statement, drift is not ok
 			failedMembers: raftValue{
-				10: {"etcd1"},
-				11: {"etcd2", "etcd3"},
-				12: {"etcd4", "etcd5"},
+				15: {"etcd5"},
 			}, // in a way or in another all members are failing, I cannot say which.
 		},
 	},

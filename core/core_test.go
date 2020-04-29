@@ -25,12 +25,22 @@ func areEqual(a, b raftValue) bool {
 	return true
 }
 
+func TestIsBetween(t *testing.T) {
+	for _, test := range testIsBetween {
+		got := IsBetween(test.value, test.min, test.max)
+		if got != test.expected {
+			t.Errorf("IsBetween test value:%d, min:%d, max: %d, expected:%t, got:%t",
+				test.value, test.min, test.max, test.expected, got)
+		}
+	}
+}
+
 func TestRaftCoherence(t *testing.T) {
 	for _, test := range testsCasesRaftIndexPerMember {
 		status, failedMembers := RaftCoherence(test.irpm, test.raftDrift)
 		// Simplified test, no map check
 		// removed || !areEqual(failedMembers, test.expected.failedMembers) for now
-		if status != test.expected.status {
+		if (status != test.expected.status) || !areEqual(failedMembers, test.expected.failedMembers) {
 			t.Errorf("RaftCoherence test: drift %v - %d\n"+
 				"\texpected:\t%t - %v\n"+
 				"\tgot:\t\t%t - %v ",
