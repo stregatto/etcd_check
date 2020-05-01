@@ -36,10 +36,10 @@ It returns the status of the cluster depending on flags.
 `-n` returns the status of cluster in _NAGIOS_ format. The RAFT index of all cluster's members are checked, all RAFT indexes must be in the +/- `maxRaftDrift` interval.
 
 ### -u
-`-u` returns the status of cluster in _NAGIOS_ format. The RAFT is not checked, it fails if the number of failing members is more than `maxFailingMember`.
+`-u` returns the status of cluster in _NAGIOS_ format. The RAFT is not checked, it fails if the number of failing (not reached) members is more than `maxFailingMember`.
 
 
-# Just for exmeriment
+# Just for experiment
 
 ## ETCD server setup
 
