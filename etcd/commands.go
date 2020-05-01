@@ -55,7 +55,7 @@ func GetRaftIndexPerMembers(cli *clientv3.Client) RaftIndexPerMember {
 	raftx := make(RaftIndexPerMember, len(ch))
 	for v := range ch {
 		raftx[v.server] = RaftData{
-			MemberId: func() uint64 {
+			MemberID: func() uint64 {
 				if v.err == nil {
 					return v.res.(*clientv3.StatusResponse).Header.MemberId
 				}

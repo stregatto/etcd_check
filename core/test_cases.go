@@ -5,9 +5,10 @@ import (
 )
 
 type expectedForRaftIndexPerMember struct {
-	status        bool
-	failedMembers RaftValue
-	nagios        string
+	status         bool
+	failedMembers  RaftValue
+	nagios         string
+	nagiosExitCode int
 }
 
 var testCasesIsBetween = []struct {
@@ -65,13 +66,15 @@ var testsCasesRaftIndexPerMember = []struct {
 			},
 		},
 		expected: struct {
-			status        bool
-			failedMembers RaftValue
-			nagios        string
+			status         bool
+			failedMembers  RaftValue
+			nagios         string
+			nagiosExitCode int
 		}{
 			true,        // is expected a true statement, drift is ok
 			RaftValue{}, // no failing members returned
-			nagiosOk,
+			nagiosTextOk,
+			0,
 		},
 	},
 	{
@@ -94,13 +97,15 @@ var testsCasesRaftIndexPerMember = []struct {
 			},
 		},
 		expected: struct {
-			status        bool
-			failedMembers RaftValue
-			nagios        string
+			status         bool
+			failedMembers  RaftValue
+			nagios         string
+			nagiosExitCode int
 		}{
 			true,        // is expected a true statement, drift is ok
 			RaftValue{}, // no failing members returned
-			nagiosOk,
+			nagiosTextOk,
+			0,
 		},
 	},
 	{
@@ -123,15 +128,17 @@ var testsCasesRaftIndexPerMember = []struct {
 			},
 		},
 		expected: struct {
-			status        bool
-			failedMembers RaftValue
-			nagios        string
+			status         bool
+			failedMembers  RaftValue
+			nagios         string
+			nagiosExitCode int
 		}{
 			false, // is expected a false statement, drift is not ok
 			RaftValue{
 				12: {"etcd2"},
 			}, // etcd2 member is failing
-			nagiosCritical + " 12:[etcd2]",
+			nagiosTextCritical + " 12:[etcd2]",
+			2,
 		},
 	},
 	{
@@ -154,15 +161,17 @@ var testsCasesRaftIndexPerMember = []struct {
 			},
 		},
 		expected: struct {
-			status        bool
-			failedMembers RaftValue
-			nagios        string
+			status         bool
+			failedMembers  RaftValue
+			nagios         string
+			nagiosExitCode int
 		}{
 			false, // is expected a false statement, drift is not ok
 			RaftValue{
 				10: {"etcd1"},
 			}, // etcd2 member is failing
-			nagiosCritical + " 10:[etcd1]",
+			nagiosTextCritical + " 10:[etcd1]",
+			2,
 		},
 	},
 	{
@@ -185,15 +194,17 @@ var testsCasesRaftIndexPerMember = []struct {
 			},
 		},
 		expected: struct {
-			status        bool
-			failedMembers RaftValue
-			nagios        string
+			status         bool
+			failedMembers  RaftValue
+			nagios         string
+			nagiosExitCode int
 		}{
 			false, // is expected a false statement, drift is not ok
 			RaftValue{
 				10: {"etcd1"}, 12: {"etcd2"}, 14: {"etcd3"},
 			}, //  all member are failing
-			nagiosCritical + " 10:[etcd1] 12:[etcd2] 14:[etcd3]",
+			nagiosTextCritical + " 10:[etcd1] 12:[etcd2] 14:[etcd3]",
+			2,
 		},
 	},
 	{
@@ -226,15 +237,17 @@ var testsCasesRaftIndexPerMember = []struct {
 			},
 		},
 		expected: struct {
-			status        bool
-			failedMembers RaftValue
-			nagios        string
+			status         bool
+			failedMembers  RaftValue
+			nagios         string
+			nagiosExitCode int
 		}{
 			false, // is expected a false statement, drift is not ok
 			RaftValue{
 				13: {"etcd3"},
 			}, // etcd3 and etcd5 are failing
-			nagiosCritical + " 13:[etcd3]",
+			nagiosTextCritical + " 13:[etcd3]",
+			2,
 		},
 	},
 	{
@@ -267,15 +280,17 @@ var testsCasesRaftIndexPerMember = []struct {
 			},
 		},
 		expected: struct {
-			status        bool
-			failedMembers RaftValue
-			nagios        string
+			status         bool
+			failedMembers  RaftValue
+			nagios         string
+			nagiosExitCode int
 		}{
 			false, // is expected a false statement, drift is not ok
 			RaftValue{
 				15: {"etcd5"},
 			}, // in a way or in another all members are failing, I cannot say which.
-			nagiosCritical + " 15:[etcd5]",
+			nagiosTextCritical + " 15:[etcd5]",
+			2,
 		},
 	},
 }

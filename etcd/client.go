@@ -15,6 +15,7 @@ import (
 	"time"
 )
 
+// SecureCfg secret object
 type SecureCfg struct {
 	Cert   string
 	Key    string
@@ -44,9 +45,9 @@ func Transport(ca string, clientCertificate string, clientCertificateKey string)
 	return t
 }
 
-// Client instantiate a new etcd client, do nothing for now.
+// HTTPClient instantiate a new etcd client, do nothing for now.
 // Not totally nothing, it puts a key and read it.
-func HttpClient(transport *http.Transport, endPoints string) {
+func HTTPClient(transport *http.Transport, endPoints string) {
 	cfg := etcdClient.Config{
 		Endpoints: []string{endPoints},
 		Transport: transport,
@@ -81,10 +82,10 @@ func HttpClient(transport *http.Transport, endPoints string) {
 	}
 }
 
-//ClientConfig returns an ETCD TLS ready client
+//GrpcClient returns an ETCD TLS ready client
 func GrpcClient(tlsCfg SecureCfg, endPoints []string) *clientv3.Client {
 	// populate the certificate and the key
-	var transportTls *transport.TLSInfo
+	var transportTLS *transport.TLSInfo
 	tlsInfo := transport.TLSInfo{
 		CertFile:            tlsCfg.Cert,
 		KeyFile:             tlsCfg.Key,
@@ -101,8 +102,8 @@ func GrpcClient(tlsCfg SecureCfg, endPoints []string) *clientv3.Client {
 		Logger:              nil,
 		EmptyCN:             false,
 	}
-	transportTls = &tlsInfo
-	clientTls, err := transportTls.ClientConfig()
+	transportTLS = &tlsInfo
+	clientTLS, err := transportTLS.ClientConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -115,7 +116,7 @@ func GrpcClient(tlsCfg SecureCfg, endPoints []string) *clientv3.Client {
 		DialKeepAliveTimeout: 0,
 		MaxCallSendMsgSize:   0,
 		MaxCallRecvMsgSize:   0,
-		TLS:                  clientTls,
+		TLS:                  clientTLS,
 		Username:             "",
 		Password:             "",
 		RejectOldCluster:     false,

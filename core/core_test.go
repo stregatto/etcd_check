@@ -51,13 +51,20 @@ func TestRaftCoherence(t *testing.T) {
 				status,
 				failedMembers)
 		}
-		outputPrintNagios := PrintNagiosRaftChoerence(status, failedMembers)
+		nagiosExitCode, outputPrintNagios := PrintNagiosRaftCoherence(status, failedMembers) // not testing exitCode for now
 		if outputPrintNagios != test.expected.nagios {
 			t.Errorf("RaftCoherence Nagios output test\n"+
 				"\texpected:\t%s\n"+
 				"\tgot:\t\t%s",
 				test.expected.nagios,
 				outputPrintNagios)
+		}
+		if nagiosExitCode != test.expected.nagiosExitCode {
+			t.Errorf("RaftCoherence Nagios exit code test\n"+
+				"\texpected:\t%d\n"+
+				"\tgot:\t\t%d",
+				test.expected.nagiosExitCode,
+				nagiosExitCode)
 		}
 	}
 }

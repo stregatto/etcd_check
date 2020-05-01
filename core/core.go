@@ -7,17 +7,17 @@ import (
 	"sort"
 )
 
-// Members check, verifies if some member is not available
-func MembersHealthiness(raftIdxPerMember etcd.RaftIndexPerMember, maxFailingMembers int) (bool, []string) {
-	status := true
+// MembersReached check, verifies if some member is not available
+func MembersReached(raftIdxPerMember etcd.RaftIndexPerMember, maxFailingMembers int) (bool, []string) {
+	status := false
 	var failedMembersList []string
 	failedMembers := 0
 	for v := range raftIdxPerMember {
 		if raftIdxPerMember[v].Err != nil {
 			failedMembers++
 			failedMembersList = append(failedMembersList, v)
-			if failedMembers >= maxFailingMembers {
-				status = false
+			if failedMembers > maxFailingMembers {
+				status = true
 			}
 		}
 	}
