@@ -5,7 +5,7 @@ import (
 )
 
 //areEqual tests two slices of failedMembers if are equal or not.
-func areEqual(a, b raftValue) bool {
+func areEqual(a, b RaftValue) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -26,7 +26,7 @@ func areEqual(a, b raftValue) bool {
 }
 
 func TestIsBetween(t *testing.T) {
-	for _, test := range testIsBetween {
+	for _, test := range testCasesIsBetween {
 		got := IsBetween(test.value, test.min, test.max)
 		if got != test.expected {
 			t.Errorf("IsBetween test value:%d, min:%d, max: %d, expected:%t, got:%t",
@@ -50,6 +50,14 @@ func TestRaftCoherence(t *testing.T) {
 				test.expected.failedMembers,
 				status,
 				failedMembers)
+		}
+		outputPrintNagios := PrintNagiosRaftChoerence(status, failedMembers)
+		if outputPrintNagios != test.expected.nagios {
+			t.Errorf("RaftCoherence Nagios output test\n"+
+				"\texpected:\t%s\n"+
+				"\tgot:\t\t%s",
+				test.expected.nagios,
+				outputPrintNagios)
 		}
 	}
 }

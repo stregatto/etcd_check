@@ -1,13 +1,16 @@
 package core
 
-import "github.com/stregatto/etcd_check/etcd"
+import (
+	"github.com/stregatto/etcd_check/etcd"
+)
 
-type expected struct {
+type expectedForRaftIndexPerMember struct {
 	status        bool
-	failedMembers raftValue
+	failedMembers RaftValue
+	nagios        string
 }
 
-var testIsBetween = []struct {
+var testCasesIsBetween = []struct {
 	value    uint64
 	min      uint64
 	max      uint64
@@ -40,7 +43,7 @@ var testIsBetween = []struct {
 var testsCasesRaftIndexPerMember = []struct {
 	raftDrift int
 	irpm      etcd.RaftIndexPerMember
-	expected  expected
+	expected  expectedForRaftIndexPerMember
 }{
 	{
 		raftDrift: 0, // Test for 0 drift
@@ -63,10 +66,12 @@ var testsCasesRaftIndexPerMember = []struct {
 		},
 		expected: struct {
 			status        bool
-			failedMembers raftValue
+			failedMembers RaftValue
+			nagios        string
 		}{
-			status:        true,        // is expected a true statement, drift is ok
-			failedMembers: raftValue{}, // no failing members returned
+			true,        // is expected a true statement, drift is ok
+			RaftValue{}, // no failing members returned
+			nagiosOk,
 		},
 	},
 	{
@@ -90,10 +95,12 @@ var testsCasesRaftIndexPerMember = []struct {
 		},
 		expected: struct {
 			status        bool
-			failedMembers raftValue
+			failedMembers RaftValue
+			nagios        string
 		}{
-			status:        true,        // is expected a true statement, drift is ok
-			failedMembers: raftValue{}, // no failing members returned
+			true,        // is expected a true statement, drift is ok
+			RaftValue{}, // no failing members returned
+			nagiosOk,
 		},
 	},
 	{
@@ -117,12 +124,14 @@ var testsCasesRaftIndexPerMember = []struct {
 		},
 		expected: struct {
 			status        bool
-			failedMembers raftValue
+			failedMembers RaftValue
+			nagios        string
 		}{
-			status: false, // is expected a false statement, drift is not ok
-			failedMembers: raftValue{
+			false, // is expected a false statement, drift is not ok
+			RaftValue{
 				12: {"etcd2"},
 			}, // etcd2 member is failing
+			nagiosCritical + " 12:[etcd2]",
 		},
 	},
 	{
@@ -146,12 +155,14 @@ var testsCasesRaftIndexPerMember = []struct {
 		},
 		expected: struct {
 			status        bool
-			failedMembers raftValue
+			failedMembers RaftValue
+			nagios        string
 		}{
-			status: false, // is expected a false statement, drift is not ok
-			failedMembers: raftValue{
-				2: {"etcd2"},
+			false, // is expected a false statement, drift is not ok
+			RaftValue{
+				10: {"etcd1"},
 			}, // etcd2 member is failing
+			nagiosCritical + " 10:[etcd1]",
 		},
 	},
 	{
@@ -175,12 +186,14 @@ var testsCasesRaftIndexPerMember = []struct {
 		},
 		expected: struct {
 			status        bool
-			failedMembers raftValue
+			failedMembers RaftValue
+			nagios        string
 		}{
-			status: false, // is expected a false statement, drift is not ok
-			failedMembers: raftValue{
+			false, // is expected a false statement, drift is not ok
+			RaftValue{
 				10: {"etcd1"}, 12: {"etcd2"}, 14: {"etcd3"},
 			}, //  all member are failing
+			nagiosCritical + " 10:[etcd1] 12:[etcd2] 14:[etcd3]",
 		},
 	},
 	{
@@ -214,12 +227,14 @@ var testsCasesRaftIndexPerMember = []struct {
 		},
 		expected: struct {
 			status        bool
-			failedMembers raftValue
+			failedMembers RaftValue
+			nagios        string
 		}{
-			status: false, // is expected a false statement, drift is not ok
-			failedMembers: raftValue{
+			false, // is expected a false statement, drift is not ok
+			RaftValue{
 				13: {"etcd3"},
 			}, // etcd3 and etcd5 are failing
+			nagiosCritical + " 13:[etcd3]",
 		},
 	},
 	{
@@ -253,12 +268,14 @@ var testsCasesRaftIndexPerMember = []struct {
 		},
 		expected: struct {
 			status        bool
-			failedMembers raftValue
+			failedMembers RaftValue
+			nagios        string
 		}{
-			status: false, // is expected a false statement, drift is not ok
-			failedMembers: raftValue{
+			false, // is expected a false statement, drift is not ok
+			RaftValue{
 				15: {"etcd5"},
 			}, // in a way or in another all members are failing, I cannot say which.
+			nagiosCritical + " 15:[etcd5]",
 		},
 	},
 }

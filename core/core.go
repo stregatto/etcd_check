@@ -25,7 +25,7 @@ func MembersHealthiness(raftIdxPerMember etcd.RaftIndexPerMember, maxFailingMemb
 }
 
 // RaftCoherence check if the raft index for every member is in the maxRaftDrift value.
-func RaftCoherence(raftIndexPerMember etcd.RaftIndexPerMember, maxRaftDrift int) (bool, raftValue) {
+func RaftCoherence(raftIndexPerMember etcd.RaftIndexPerMember, maxRaftDrift int) (bool, RaftValue) {
 
 	//TODO: Divides in multiple functions
 	var f = map[uint64][]string{}
@@ -35,7 +35,7 @@ func RaftCoherence(raftIndexPerMember etcd.RaftIndexPerMember, maxRaftDrift int)
 
 	// everything is ok, I can exit right now.
 	if len(f) <= 1 {
-		return true, raftValue{}
+		return true, RaftValue{}
 	}
 
 	// define the quorum, it's supposed the ETCD cluster has odd number of members
@@ -66,7 +66,7 @@ func RaftCoherence(raftIndexPerMember etcd.RaftIndexPerMember, maxRaftDrift int)
 
 	// TODO: verify if can be refactored in the previous functions
 	// evaluate the f map of compacted rafts accordingly to quorum value, quorum = 0 means no quorum reached
-	var failedMembers = raftValue{}
+	var failedMembers = RaftValue{}
 	for k, v := range f {
 		if (len(v) < quorum) || quorum == 0 {
 			failedMembers[k] = append(failedMembers[k], v...)
