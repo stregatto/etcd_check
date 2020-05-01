@@ -1,16 +1,42 @@
 # etcd_check
 This is a simple _ETCD_ check, it's intended to verify if all endpoints are ok, and it's useful to better understand ETCD api :)
 
-## run
+## Long story short
 
 To run this software you have to enumerate all endpoints and the certificate it will use to access them
 
-`go run ./main.go -endpoints etcd1:2379,etcd2:2381,etcd3:2383 -cert ./etcd_tls/etcd1.pem -key ./etcd_tls/etcd1-key.pem`
+`etcd_check -endpoints etcd1:2379,etcd2:2381,etcd3:2383 -cert ./etcd_tls/etcd1.pem -key ./etcd_tls/etcd1-key.pem` -n -u
 
-## returns
+## Usage
 
-It returns something, it still depends on my experiments :D.
-Now it returns the outputs of some function and `true` or `false` if the raftindex of queried cluster members is in the drift or not.
+```
+etcd_check:
+  -cacert string
+        Certification authority file (default "etcd_tls/ca.pem")
+  -cert string
+        Server or Client certificate file (default "etcd_tls/server.pem")
+  -endpoints string
+        Comma separated list of ETCD endpoints without protocol (default "etcd1:2379")
+  -key string
+        Server or Client certificate key file (default "etcd_tls/server-key.pem")
+  -maxFailingMember int
+        The max number of ETCD servers can fail in your cluster
+  -maxRaftDrift int
+        The max drift the raft index can support (default 1)
+  -n    Print cluster status in NAGIOS ready format
+  -u    Print only unreachable nodes in NAGIOS ready format, it excludes raft check
+```
+
+## Returns
+
+It returns the status of the cluster depending on flags.
+
+### -n
+
+`-n` returns the status of cluster in _NAGIOS_ format. The RAFT index of all cluster's members are checked, all RAFT indexes must be in the +/- `maxRaftDrift` interval.
+
+### -u
+`-u` returns the status of cluster in _NAGIOS_ format. The RAFT is not checked, it fails if the number of failing members is more than `maxFailingMember`.
 
 # ETCD server setup
 
