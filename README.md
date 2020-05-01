@@ -38,7 +38,10 @@ It returns the status of the cluster depending on flags.
 ### -u
 `-u` returns the status of cluster in _NAGIOS_ format. The RAFT is not checked, it fails if the number of failing members is more than `maxFailingMember`.
 
-# ETCD server setup
+
+# Just for exmeriment
+
+## ETCD server setup
 
 It's useful to have an _ETCD_ cluster to test the software. In this repo you'll find some useful (and very "stupid") scripts to run a dummy _ETCD_ cluster with _TLS_ on docker.
 
@@ -48,4 +51,4 @@ It's useful to have an _ETCD_ cluster to test the software. In this repo you'll 
  * `test.sh` : It performs a cURL to your first etcd server via docker exported port and perform etcdctl cluster status to your first _etcd1_ .
  * `jumpin.sh`: I'm too lazy to write commands, it jumps in the first _ETCD_ container, it's very dumb.
  
-Please *DO NOT USE* this scripts in production.
+Please *DO NOT USE* the .sh scripts in production.
