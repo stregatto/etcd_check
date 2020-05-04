@@ -5,7 +5,7 @@ This is a simple _ETCD_ check, it's intended to verify if all endpoints are ok, 
 
 To run this software you have to enumerate all endpoints and the certificate it will use to access them
 
-`etcd_check -endpoints etcd1:2379,etcd2:2381,etcd3:2383 -cert ./etcd_tls/etcd1.pem -key ./etcd_tls/etcd1-key.pem` -n -u
+`etcd_check -endpoints etcd1:2379,etcd2:2381,etcd3:2383 -cert ./etcd_tls/etcd1.pem -key ./etcd_tls/etcd1-key.pem -n -u`
 
 ## Usage
 
@@ -38,6 +38,24 @@ It returns the status of the cluster depending on flags.
 ### -u
 `-u` returns the status of cluster in _NAGIOS_ format. The RAFT is not checked, it fails if the number of failing (not reached) members is more than `maxFailingMember`.
 
+
+# Compiling issues
+
+Because of https://github.com/etcd-io/etcd/issues/11154 you need some tricks to compile your go.mod.
+
+In your go.etcd.io checkout v3.4 perform the below command to retrieve the MVS (Minimal Version Selection) and with that you can create your _requirement_
+```
+TZ=UTC git --no-pager show \
+>   --quiet \
+>   --abbrev=12 \
+>   --date='format-local:%Y%m%d%H%M%S' \
+>   --format="%cd-%h"
+```
+
+In go.mod set this:
+```
+require go.etcd.io/etcd v0.0.0-[THE_OUTPUT_OF_ABOVE_COMMAND]
+```
 
 # Just for experiment
 
