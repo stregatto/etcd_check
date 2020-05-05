@@ -7,6 +7,26 @@ import (
 	"sort"
 )
 
+// getQuorum finds the hypothetical quorum value, it's supposed the ETCD cluster has odd number of members
+func getQuorum(raftIndexPerMember etcd.RaftIndexPerMember) int {
+	return len(raftIndexPerMember)/2 + 1
+}
+
+// TODO: should map[uint64][]string{} become a type?
+
+// compactRaftMap, compact Raft index maps collapsing all nodes whit raft index inside the raft interval, +/- maxRaftDrift
+func compactRaftMap(raftWhitMajorityOfMembers uint64, maxRaftDrift int, f map[uint64][]string) map[uint64][]string {
+	maxRaft := raftWhitMajorityOfMembers + uint64(maxRaftDrift)
+	minRaft := raftWhitMajorityOfMembers - uint64(maxRaftDrift)
+	for k, v := range f {
+		if IsBetween(k, minRaft, maxRaft) && k != raftWhitMajorityOfMembers {
+			f[raftWhitMajorityOfMembers] = append(f[raftWhitMajorityOfMembers], v...)
+			delete(f, k)
+		}
+	}
+	return f
+}
+
 // MembersReached check, verifies if some member is not available
 func MembersReached(raftIdxPerMember etcd.RaftIndexPerMember, maxFailingMembers int) (bool, []string) {
 	status := false
@@ -39,16 +59,16 @@ func RaftCoherence(raftIndexPerMember etcd.RaftIndexPerMember, maxRaftDrift int)
 	}
 
 	// define the quorum, it's supposed the ETCD cluster has odd number of members
-	quorum := len(raftIndexPerMember)/2 + 1
+	quorum := getQuorum(raftIndexPerMember)
 
-	var raftWihtMajorityOfMembers = uint64(0) // temporary max raft
+	var raftWhitMajorityOfMembers = uint64(0) // temporary max raft
 	var maxNodes = 0                          // temporary max node per raft
 	var raftQuorumValue = uint64(0)           // The raft quorum it exists, if not the value is 0
 	for k, v := range f {
 		// define the raft that has the max number of nodes
 		if len(v) > maxNodes {
 			maxNodes = len(v)
-			raftWihtMajorityOfMembers = k
+			raftWhitMajorityOfMembers = k
 		}
 		// define the raft index the quorum has, if exists.
 		if len(v) >= quorum && raftQuorumValue == 0 {
@@ -57,14 +77,8 @@ func RaftCoherence(raftIndexPerMember etcd.RaftIndexPerMember, maxRaftDrift int)
 	}
 
 	// compact the map using, the raft should be not outside the raft interval
-	for k, v := range f {
-		if IsBetween(k, raftWihtMajorityOfMembers-1, raftWihtMajorityOfMembers+1) && k != raftWihtMajorityOfMembers {
-			f[raftWihtMajorityOfMembers] = append(f[raftWihtMajorityOfMembers], v...)
-			delete(f, k)
-		}
-	}
+	f = compactRaftMap(raftWhitMajorityOfMembers, maxRaftDrift, f)
 
-	// TODO: verify if can be refactored in the previous functions
 	// evaluate the f map of compacted rafts accordingly to quorum value, quorum = 0 means no quorum reached
 	var failedMembers = RaftValue{}
 	for k, v := range f {
